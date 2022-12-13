@@ -1,44 +1,33 @@
 import './css/style.css';
 import Notiflix from 'notiflix';
 
-// const refs = {
-//   button: document.querySelector('.submitButton'),
-//   input: document.querySelector('search-input'),
-// };
-
-// refs.button.addEventListener('click', onClick);
-
-// function onClick(event) {
-//   event.preventDefault();
-//   console.log('Кнопка працює');
-//   Notiflix.Notify.success('Повідомлення працюють');
-// }
 
 const refs = {
   form: document.querySelector('.search-form'),
-  list: document.querySelector('.news-list'),
-  // submitButton: document.querySelector('.submitButton'),
+  list: document.querySelector('.gallery'),
+  submitButton: document.querySelector('.submitButton'),
   loader: document.querySelector('.news-loader'),
-  inputText: document.querySelector('.search-input'),
 };
 const URL = 'https://pixabay.com/api/';
 
 let items = [];
 
-// refs.inputText.addEventListener('input', onInput);
-// refs.submitButton.addEventListener('click', onClick);
-refs.form.addEventListener('submit', onSubmit);
-const onSubmit = e => {
-  const { value } = e.target.elements.query;
+
+function onSubmit(e) {
   e.preventDefault();
+  // console.log(e.target.elements.searchQuery.value);
+  const value = e.target.elements.searchQuery.value;
+  
+  console.log(value);
+
   // const value = e.target.value;
   let valueTrim = value.trim();
-  console.log('запит через Сабміт');
   if (valueTrim) {
     refs.list.innerHTML = '';
     showLoader();
+    lockForm();
     fetch(
-      `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true`
+      `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40`
     )
       .then(resp => {
         if (!resp.ok) {
@@ -47,9 +36,12 @@ const onSubmit = e => {
         return resp.json();
       })
       .then(data => {
-        // items = data;
-        console.log(data);
-        // render();
+        items = data.hits;
+        if (items.length == 0) {
+          throw Error();
+        }
+        console.log(items);
+        render();
       })
       .catch(error => {
         Notiflix.Notify.failure(
@@ -58,52 +50,49 @@ const onSubmit = e => {
       })
       .finally(() => {
         hideLoader();
+        unlockForm();
       });
   }
 };
 
-const getItemtemplateMin = ({ name, flags }) => {
-  let result = `<li class="news-list-li"> 
-    <img width = 30px src=${flags.svg}>
-    <span class="name-country"> ${name.official}</span>
-    </li>`;
-  return result;
-};
+refs.form.addEventListener('submit', onSubmit);
 
-const getItemtemplateMax = ({
-  name,
-  capital,
-  population,
-  flags,
-  languages,
-}) => {
-  let lang = Object.values(languages).join(', ');
-  let result = `<li class="news-item">
-       <img width = 30px src=${flags.svg} alt=${name}> 
-    <span class="name-country-big"> ${name.official}</span>
-      <p><b>Capital:</b> ${capital}</p>
-      <p><b>Population:</b> ${population}</p>
-      <p><b>Languages:</b> ${lang}</p>
-        </li>
-    `;
-  return result;
-};
+const getItemtemplateMin = ({
+  webformatURL,
+  largeImageURL,
+  tags,
+  likes,
+  views,
+  comments,
+  downloads }) =>
+  `<div class="photo-card">
+  <img class="gallery__image" src=${webformatURL} alt=${tags} loading="lazy" />
+  <div class="info">
+    <p class="info-item">
+      <b>Likes</b>
+      <span>${likes}</span>
+    </p>
+    <p class="info-item">
+      <b>Views</b>
+      <span>${views}</span>
+    </p>
+        <p class="info-item">
+      <b>Comments</b>
+      <span>${comments}</span>
+    </p>
+    <p class="info-item">
+      <b>Downloads</b>
+      <span>${downloads}</span>
+    </p>
+  </div>
+</div>`;
 
 const render = () => {
-  if (items.length > 10) {
-    Notiflix.Notify.info(
-      'Too many matches found. Please enter a more specific name.'
-    );
-  } else if (items.length <= 10 && items.length >= 2) {
-    const list = items.map(getItemtemplateMin);
+ const list = items.map(getItemtemplateMin);
     refs.list.innerHTML = '';
     refs.list.insertAdjacentHTML('beforeend', list.join(''));
-  } else if (items.length == 1) {
-    const list = items.map(getItemtemplateMax);
-    refs.list.innerHTML = '';
-    refs.list.insertAdjacentHTML('beforeend', list.join(''));
-  }
 };
+
 
 const showLoader = () => {
   refs.loader.classList.add('show');
@@ -113,9 +102,9 @@ const hideLoader = () => {
   refs.loader.classList.remove('show');
 };
 
-// const lockForm = () => {
-//   refs.submitButton.setAttribute('disabled', true);
-// };
-// const unlockForm = () => {
-//   refs.submitButton.removeAttribute('disabled');
-// };
+const lockForm = () => {
+  refs.submitButton.setAttribute('disabled', true);
+};
+const unlockForm = () => {
+  refs.submitButton.removeAttribute('disabled');
+};
