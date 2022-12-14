@@ -1,5 +1,7 @@
 import './css/style.css';
 import Notiflix from 'notiflix';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 
 
 const refs = {
@@ -7,11 +9,26 @@ const refs = {
   list: document.querySelector('.gallery'),
   submitButton: document.querySelector('.submitButton'),
   loader: document.querySelector('.news-loader'),
+  gallery: document.querySelector('.gallery'),
 };
+
+refs.gallery.addEventListener('click', onClickGallery);
 const URL = 'https://pixabay.com/api/';
 
 let items = [];
 
+function onClickGallery(event) {
+  console.log(event);
+  event.preventDefault();
+  if (event.target.nodeName !== "IMG") {
+    return;
+  }
+  let newGallery = new SimpleLightbox('.gallery a');
+  // newGallery.on('show.simplelightbox', function () {
+  //   newGallery.destroy();
+  //   // newGallery.close();
+  // });
+}
 
 function onSubmit(e) {
   e.preventDefault();
@@ -36,6 +53,10 @@ function onSubmit(e) {
         return resp.json();
       })
       .then(data => {
+        
+        console.log(data);
+        const { totalHits } = data;
+        Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
         items = data.hits;
         if (items.length == 0) {
           throw Error();
@@ -57,6 +78,7 @@ function onSubmit(e) {
 
 refs.form.addEventListener('submit', onSubmit);
 
+
 const getItemtemplateMin = ({
   webformatURL,
   largeImageURL,
@@ -66,7 +88,9 @@ const getItemtemplateMin = ({
   comments,
   downloads }) =>
   `<div class="photo-card">
-  <img class="gallery__image" src=${webformatURL} alt=${tags} loading="lazy" />
+  <a class="photo-link" href=${largeImageURL} >
+  <img class="gallery__image" src=${webformatURL} alt="${tags}" loading="lazy" />
+  </a>
   <div class="info">
     <p class="info-item">
       <b>Likes</b>
@@ -84,6 +108,7 @@ const getItemtemplateMin = ({
       <b>Downloads</b>
       <span>${downloads}</span>
     </p>
+  
   </div>
 </div>`;
 
