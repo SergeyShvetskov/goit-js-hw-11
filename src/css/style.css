@@ -96,3 +96,12 @@ body {
 .gallery__link:hover {
     cursor: zoom-in;
 }
+
+.info {
+    margin: 0;
+    display: flex;
+}
+.info-item {
+    text-align: center;
+    margin: 0;
+}
