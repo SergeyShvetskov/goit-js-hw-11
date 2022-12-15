@@ -2,6 +2,7 @@ import './css/style.css';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+// import axios from 'axios';
 
 const refs = {
   form: document.querySelector('.search-form'),
@@ -9,12 +10,15 @@ const refs = {
   submitButton: document.querySelector('.submitButton'),
   loader: document.querySelector('.news-loader'),
   gallery: document.querySelector('.gallery'),
+  loadMoreButton: document.querySelector('.load-more'),
 };
 
 refs.gallery.addEventListener('click', onClickGallery);
 const URL = 'https://pixabay.com/api/';
 
 let items = [];
+let page = 1;
+let valueTrim = '';
 
 function onClickGallery(event) {
   console.log(event);
@@ -22,28 +26,63 @@ function onClickGallery(event) {
   if (event.target.nodeName !== 'IMG') {
     return;
   }
-  let newGallery = new SimpleLightbox('.gallery a');
+  const newGallery = new SimpleLightbox('.gallery a');
   // newGallery.on('show.simplelightbox', function () {
   //   newGallery.destroy();
   //   // newGallery.close();
   // });
 }
+function onClickLoadMore(e) {
+  page += 1;
+  showLoader();
+  lockForm();
+
+  fetch(
+    // axios.get(
+    `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
+  )
+    .then(resp => {
+      if (!resp.ok) {
+        throw Error();
+      }
+      return resp.json();
+    })
+    .then(data => {
+      console.log(data);
+      const { totalHits } = data;
+
+      items = data.hits;
+      if (items.length == 0) {
+        throw Error();
+      }
+      console.log(items);
+      render();
+    })
+    .catch(error => {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    })
+    .finally(() => {
+      hideLoader();
+      unlockForm();
+    });
+}
 
 function onSubmit(e) {
   e.preventDefault();
-  // console.log(e.target.elements.searchQuery.value);
+  page = 1;
   const value = e.target.elements.searchQuery.value;
 
-  console.log(value);
-
-  // const value = e.target.value;
-  let valueTrim = value.trim();
+  valueTrim = value.trim();
   if (valueTrim) {
     refs.list.innerHTML = '';
     showLoader();
     lockForm();
+    loadMoreHide();
     fetch(
-      `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40`
+      // axios.get(
+      `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
     )
       .then(resp => {
         if (!resp.ok) {
@@ -63,6 +102,7 @@ function onSubmit(e) {
         }
         console.log(items);
         render();
+        loadMoreShow();
       })
       .catch(error => {
         Notiflix.Notify.failure(
@@ -77,6 +117,7 @@ function onSubmit(e) {
 }
 
 refs.form.addEventListener('submit', onSubmit);
+refs.loadMoreButton.addEventListener('click', onClickLoadMore);
 
 const getItemtemplateMin = ({
   webformatURL,
@@ -114,7 +155,9 @@ const getItemtemplateMin = ({
 
 const render = () => {
   const list = items.map(getItemtemplateMin);
-  refs.list.innerHTML = '';
+  if (page === 1) {
+    refs.list.innerHTML = '';
+  }
   refs.list.insertAdjacentHTML('beforeend', list.join(''));
 };
 
@@ -132,3 +175,11 @@ const lockForm = () => {
 const unlockForm = () => {
   refs.submitButton.removeAttribute('disabled');
 };
+
+function loadMoreShow() {
+  refs.loadMoreButton.classList.add('show');
+}
+
+function loadMoreHide() {
+  refs.loadMoreButton.classList.remove('show');
+}
