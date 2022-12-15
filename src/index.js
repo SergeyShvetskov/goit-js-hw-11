@@ -1,8 +1,7 @@
 import './css/style.css';
 import Notiflix from 'notiflix';
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
-
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const refs = {
   form: document.querySelector('.search-form'),
@@ -20,7 +19,7 @@ let items = [];
 function onClickGallery(event) {
   console.log(event);
   event.preventDefault();
-  if (event.target.nodeName !== "IMG") {
+  if (event.target.nodeName !== 'IMG') {
     return;
   }
   let newGallery = new SimpleLightbox('.gallery a');
@@ -34,7 +33,7 @@ function onSubmit(e) {
   e.preventDefault();
   // console.log(e.target.elements.searchQuery.value);
   const value = e.target.elements.searchQuery.value;
-  
+
   console.log(value);
 
   // const value = e.target.value;
@@ -53,10 +52,11 @@ function onSubmit(e) {
         return resp.json();
       })
       .then(data => {
-        
         console.log(data);
         const { totalHits } = data;
-        Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+        if (totalHits !== 0) {
+          Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+        }
         items = data.hits;
         if (items.length == 0) {
           throw Error();
@@ -74,10 +74,9 @@ function onSubmit(e) {
         unlockForm();
       });
   }
-};
+}
 
 refs.form.addEventListener('submit', onSubmit);
-
 
 const getItemtemplateMin = ({
   webformatURL,
@@ -86,7 +85,8 @@ const getItemtemplateMin = ({
   likes,
   views,
   comments,
-  downloads }) =>
+  downloads,
+}) =>
   `<div class="photo-card">
   <a class="photo-link" href=${largeImageURL} >
   <img class="gallery__image" src=${webformatURL} alt="${tags}" loading="lazy" />
@@ -113,11 +113,10 @@ const getItemtemplateMin = ({
 </div>`;
 
 const render = () => {
- const list = items.map(getItemtemplateMin);
-    refs.list.innerHTML = '';
-    refs.list.insertAdjacentHTML('beforeend', list.join(''));
+  const list = items.map(getItemtemplateMin);
+  refs.list.innerHTML = '';
+  refs.list.insertAdjacentHTML('beforeend', list.join(''));
 };
-
 
 const showLoader = () => {
   refs.loader.classList.add('show');
