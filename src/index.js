@@ -1,7 +1,8 @@
 import './css/style.css';
 import Notiflix from 'notiflix';
-import SimpleLightbox from 'simplelightbox';
+import SimpleLightbox from "simplelightbox";
 import 'simplelightbox/dist/simple-lightbox.min.css';
+
 
 const axios = require('axios').default;
 
@@ -15,20 +16,32 @@ const refs = {
 };
 
 refs.gallery.addEventListener('click', onClickGallery);
+
 const URL = 'https://pixabay.com/api/';
+const key = '32016262-7f9a92cb69c408002dfb9dc09';
+
 
 let items = [];
 let page = 1;
 let valueTrim = '';
-let newGallery = "";
+const lightbox = new SimpleLightbox('.gallery a', {captionsData:"alt", captionDelay:250});
+
 
 function onClickGallery(event) {
-  console.log(event);
+  
+  // Notiflix.Notify.success(event);
+  // Notiflix.Notify.success(event.target.nodeName);
   event.preventDefault();
-  if (event.target.nodeName !== 'IMG') {
-    return;
-  }
-  newGallery = new SimpleLightbox('.gallery a');
+  // lightbox.refresh();
+  Notiflix.Notify.success('пройшло превент');
+const lightbox = new SimpleLightbox('.gallery a', {captionsData:"alt", captionDelay:250});
+
+  // console.log(event);
+  // if (event.target.nodeName !== 'IMG') {
+  //   return;
+  // }
+  // newGallery.refresh();
+  // newGallery = new SimpleLightbox('.gallery a', {captionsData:"alt", captionDelay:250});
   
   // newGallery.on('show.simplelightbox', function () {
   //   newGallery.destroy();
@@ -39,9 +52,8 @@ function onClickGallery(event) {
   page += 1;
   showLoader();
   lockForm();
-
     await axios.get(
-    `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
+    `${URL}?key=${key}&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
     )
       .then(response => response.data).then(data => {
         items = data.hits;
@@ -71,7 +83,7 @@ async function onSubmit(e) {
     lockForm();
     loadMoreHide();
      await axios.get(
-      `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
+      `${URL}?key=${key}&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
      ).then(response => response.data)
   
       .then(data => {
