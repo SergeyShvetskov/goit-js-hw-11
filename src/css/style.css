@@ -29,7 +29,7 @@ body {
 .load-more {
     margin-left: auto;
     margin-right: auto;
-    /* display: none; */
+    display: none;
     color: white;
     text-transform: uppercase;
     border-radius: 5px;

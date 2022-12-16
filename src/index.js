@@ -2,7 +2,8 @@ import './css/style.css';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-// import axios from 'axios';
+
+const axios = require('axios').default;
 
 const refs = {
   form: document.querySelector('.search-form'),
@@ -19,6 +20,7 @@ const URL = 'https://pixabay.com/api/';
 let items = [];
 let page = 1;
 let valueTrim = '';
+let newGallery = "";
 
 function onClickGallery(event) {
   console.log(event);
@@ -26,39 +28,26 @@ function onClickGallery(event) {
   if (event.target.nodeName !== 'IMG') {
     return;
   }
-  const newGallery = new SimpleLightbox('.gallery a');
+  newGallery = new SimpleLightbox('.gallery a');
+  
   // newGallery.on('show.simplelightbox', function () {
   //   newGallery.destroy();
   //   // newGallery.close();
   // });
 }
-function onClickLoadMore(e) {
+ async function onClickLoadMore(e) {
   page += 1;
   showLoader();
   lockForm();
 
-  fetch(
-    // axios.get(
+    await axios.get(
     `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
-  )
-    .then(resp => {
-      if (!resp.ok) {
-        throw Error();
-      }
-      return resp.json();
-    })
-    .then(data => {
-      console.log(data);
-      const { totalHits } = data;
-
-      items = data.hits;
-      if (items.length == 0) {
-        throw Error();
-      }
-      console.log(items);
-      render();
-    })
-    .catch(error => {
+    )
+      .then(response => response.data).then(data => {
+        items = data.hits;
+        render();
+      })
+       .catch(error => {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
@@ -69,7 +58,8 @@ function onClickLoadMore(e) {
     });
 }
 
-function onSubmit(e) {
+
+async function onSubmit(e) {
   e.preventDefault();
   page = 1;
   const value = e.target.elements.searchQuery.value;
@@ -80,16 +70,10 @@ function onSubmit(e) {
     showLoader();
     lockForm();
     loadMoreHide();
-    fetch(
-      // axios.get(
+     await axios.get(
       `${URL}?key=32016262-7f9a92cb69c408002dfb9dc09&q=${valueTrim}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
-    )
-      .then(resp => {
-        if (!resp.ok) {
-          throw Error();
-        }
-        return resp.json();
-      })
+     ).then(response => response.data)
+  
       .then(data => {
         console.log(data);
         const { totalHits } = data;
@@ -115,6 +99,7 @@ function onSubmit(e) {
       });
   }
 }
+
 
 refs.form.addEventListener('submit', onSubmit);
 refs.loadMoreButton.addEventListener('click', onClickLoadMore);
