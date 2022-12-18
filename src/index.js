@@ -24,29 +24,16 @@ const key = '32016262-7f9a92cb69c408002dfb9dc09';
 let items = [];
 let page = 1;
 let valueTrim = '';
-const lightbox = new SimpleLightbox('.gallery a', {captionsData:"alt", captionDelay:250});
 
 
 function onClickGallery(event) {
-  
-  // Notiflix.Notify.success(event);
-  // Notiflix.Notify.success(event.target.nodeName);
-  event.preventDefault();
-  // lightbox.refresh();
-  Notiflix.Notify.success('пройшло превент');
-const lightbox = new SimpleLightbox('.gallery a', {captionsData:"alt", captionDelay:250});
-
-  // console.log(event);
   // if (event.target.nodeName !== 'IMG') {
+  //   Notiflix.Notify.failure('No IMG');
+  //    lightbox.destroy();
   //   return;
   // }
-  // newGallery.refresh();
-  // newGallery = new SimpleLightbox('.gallery a', {captionsData:"alt", captionDelay:250});
-  
-  // newGallery.on('show.simplelightbox', function () {
-  //   newGallery.destroy();
-  //   // newGallery.close();
-  // });
+  event.preventDefault();
+var lightbox = new SimpleLightbox('.gallery a', {captionsData:"alt", captionDelay:250});
 }
  async function onClickLoadMore(e) {
   page += 1;
@@ -180,3 +167,4 @@ function loadMoreShow() {
 function loadMoreHide() {
   refs.loadMoreButton.classList.remove('show');
 }
+
